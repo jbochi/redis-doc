@@ -163,8 +163,8 @@ There is no difference between using the helper functions or directly returning 
 
 ## Atomicity of scripts
 
-Redis uses the same Lua interpreter to run all the commands.
-Also Redis guarantees that a script is executed in an atomic way: no other
+Redis uses the same Lua interpreter to run all `EVAL` and `EVALSHA` commands.
+Redis also guarantees that a `EVAL` command is executed in an atomic way: no other
 script or Redis command will be executed while a script is being executed.
 This semantics is very similar to the one of `MULTI` / `EXEC`.
 From the point of view of all the other clients the effects of a script are
@@ -174,6 +174,11 @@ However this also means that executing slow scripts is not a good idea.
 It is not hard to create fast scripts, as the script overhead is very low, but
 if you are going to use slow scripts you should be aware that while the script
 is running no other client can execute commands since the server is busy.
+
+If you don't require atomicity, you can opt to run the scripts asynchronously.
+With the `EVALASYNC` and `EVALSHAASYNC` counterpart commands, it's possible to
+create long running scripts without blocking other clients. Redis uses a fixed
+size thread pool with one Lua State for async script execution.
 
 ## Error handling
 
@@ -322,6 +327,7 @@ SCRIPT currently accepts three different commands:
     the dataset during their execution (since stopping a read-only script does
     not violate the scripting engine's guaranteed atomicity).
     See the next sections for more information about long running scripts.
+    Async scripts cannot be currently killed.
 
 ## Scripts as pure functions
 
@@ -458,6 +464,9 @@ as `math.random` and `math.randomseed` is guaranteed to have the same output
 regardless of the architecture of the system running Redis.
 32-bit, 64-bit, big-endian and little-endian systems will all produce the same
 output.
+
+Async counterparts, do not have these limitations, since they are replicated
+by the commands they execute, not by running the script again.
 
 ## Global variables protection
 
@@ -655,6 +664,9 @@ following happens:
 * If the script already called write commands the only allowed command becomes
   `SHUTDOWN NOSAVE` that stops the server without saving the current data set on
   disk (basically the server is aborted).
+
+ `EVALASYNC` and `EVALSHAASYNC`` do not obey the time limit restriction, since they
+ do not block other clients.
 
 ## EVALSHA in the context of pipelining
 

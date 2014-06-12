@@ -355,6 +355,32 @@
     "since": "2.6.0",
     "group": "scripting"
   },
+  "EVALASYNC": {
+    "summary": "Execute a Lua script server side asynchronously",
+    "complexity": "Depends on the script that is executed.",
+    "arguments": [
+      {
+        "name": "script",
+        "type": "string"
+      },
+      {
+        "name": "numkeys",
+        "type": "integer"
+      },
+      {
+        "name": "key",
+        "type": "key",
+        "multiple": true
+      },
+      {
+        "name": "arg",
+        "type": "string",
+        "multiple": true
+      }
+    ],
+    "since": "2.6.0",
+    "group": "scripting"
+  },
   "EVALSHA": {
     "summary": "Execute a Lua script server side",
     "complexity": "Depends on the script that is executed.",
@@ -378,7 +404,33 @@
         "multiple": true
       }
     ],
-    "since": "2.6.0",
+    "since": "unstable",
+    "group": "scripting"
+  },
+  "EVALSHAASYNC": {
+    "summary": "Execute a Lua script server side asynchronously",
+    "complexity": "Depends on the script that is executed.",
+    "arguments": [
+      {
+        "name": "sha1",
+        "type": "string"
+      },
+      {
+        "name": "numkeys",
+        "type": "integer"
+      },
+      {
+        "name": "key",
+        "type": "key",
+        "multiple": true
+      },
+      {
+        "name": "arg",
+        "type": "string",
+        "multiple": true
+      }
+    ],
+    "since": "unstable",
     "group": "scripting"
   },
   "EXEC": {
