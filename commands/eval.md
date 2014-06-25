@@ -103,7 +103,8 @@ The following table shows you all the conversions rules:
 
 * Lua number -> Redis integer reply (the number is converted into an integer)
 * Lua string -> Redis bulk reply
-* Lua table (array) -> Redis multi bulk reply (truncated to the first nil inside the Lua array if any)
+* Lua table (array) -> Redis multi bulk reply (truncated to the first nil inside
+  the Lua array if any)
 * Lua table with a single `ok` field -> Redis status reply
 * Lua table with a single `err` field -> Redis error reply
 * Lua boolean false -> Redis Nil bulk reply.
@@ -115,8 +116,17 @@ Redis to Lua conversion rule:
 
 Also there are two important rules to note:
 
-* Lua has a single numerical type, Lua numbers. There is no distinction between integers and floats. So we always convert Lua numbers into integer replies, removing the decimal part of the number if any. **If you want to return a float from Lua you should return it as a string**, exactly like Redis itself does (see for instance the `ZSCORE` command).
-* There is [no simple way to have nils inside Lua arrays](http://www.lua.org/pil/19.1.html), this is a result of Lua table semantics, so when Redis converts a Lua array into Redis protocol the conversion is stopped if a nil is encountered.
+* Lua has a single numerical type, Lua numbers.
+  There is no distinction between integers and floats.
+  So we always convert Lua numbers into integer replies, removing the decimal
+  part of the number if any.
+  **If you want to return a float from Lua you should return it as a string**,
+  exactly like Redis itself does (see for instance the `ZSCORE` command).
+* There is [no simple way to have nils inside Lua arrays][hwlop11h], this is a
+  result of Lua table semantics, so when Redis converts a Lua array into Redis
+  protocol the conversion is stopped if a nil is encountered.
+
+[hwlop11h]: http://www.lua.org/pil/19.1.html
 
 Here are a few conversion examples:
 
@@ -133,6 +143,7 @@ Here are a few conversion examples:
 > eval "return redis.call('get','foo')" 0
 "bar"
 ```
+
 The last example shows how it is possible to receive the exact return value of
 `redis.call()` or `redis.pcall()` from Lua that would be returned if the command
 was called directly.
@@ -147,25 +158,33 @@ In the following example we can see how floats and arrays with nils are handled:
 4) "foo"
 ```
 
-As you can see 3.333 is converted into 3, and the *bar* string is never returned as there is a nil before.
+As you can see 3.333 is converted into 3, and the _bar_ string is never returned
+as there is a nil before.
 
 ## Helper functions to return Redis types
 
 There are two helper functions to return Redis types from Lua.
 
-* `redis.error_reply(error_string)` returns an error reply. This function simply returns the single field table with the `err` field set to the specified string for you.
-* `redis.status_reply(status_string)` returns a status reply. This function simply returns the single field table with the `ok` field set to the specified string for you.
+* `redis.error_reply(error_string)` returns an error reply.
+  This function simply returns the single field table with the `err` field set
+  to the specified string for you.
+* `redis.status_reply(status_string)` returns a status reply.
+  This function simply returns the single field table with the `ok` field set to
+  the specified string for you.
 
-There is no difference between using the helper functions or directly returning the table with the specified format, so the following two forms are equivalent:
+There is no difference between using the helper functions or directly returning
+the table with the specified format, so the following two forms are equivalent:
 
-    return {err="My Error"}
-    return redis.error_reply("My Error")
+```
+return {err="My Error"}
+return redis.error_reply("My Error")
+```
 
 ## Atomicity of scripts
 
 Redis uses the same Lua interpreter to run all `EVAL` and `EVALSHA` commands.
-Redis also guarantees that a `EVAL` command is executed in an atomic way: no other
-script or Redis command will be executed while a script is being executed.
+Redis also guarantees that a `EVAL` command is executed in an atomic way: no
+other script or Redis command will be executed while a script is being executed.
 This semantics is very similar to the one of `MULTI` / `EXEC`.
 From the point of view of all the other clients the effects of a script are
 either still not visible or already completed.
@@ -177,8 +196,9 @@ is running no other client can execute commands since the server is busy.
 
 If you don't require atomicity, you can opt to run the scripts asynchronously.
 With the `EVALASYNC` and `EVALSHAASYNC` counterpart commands, it's possible to
-create long running scripts without blocking other clients. Redis uses a fixed
-size thread pool with one Lua State for async script execution.
+create long running scripts without blocking other clients.
+Redis uses a fixed size thread pool with one Lua State for async script
+execution.
 
 ## Error handling
 
@@ -256,29 +276,37 @@ by Redis.
 ## Script cache semantics
 
 Executed scripts are guaranteed to be in the script cache of a given execution
-of a Redis instance forever. This means that if an `EVAL` is performed against a Redis instance all the subsequent `EVALSHA` calls will succeed.
+of a Redis instance forever.
+This means that if an `EVAL` is performed against a Redis instance all the
+subsequent `EVALSHA` calls will succeed.
 
 The reason why scripts can be cached for long time is that it is unlikely for
 a well written application to have enough different scripts to cause memory
-problems. Every script is conceptually like the implementation of a new command, and even a large application will likely have just a few hundred of them.
+problems.
+Every script is conceptually like the implementation of a new command, and even
+a large application will likely have just a few hundred of them.
 Even if the application is modified many times and scripts will change, the
 memory used is negligible.
 
-The only way to flush the script cache is by explicitly calling the `SCRIPT FLUSH` command, which will _completely flush_ the scripts cache removing all the
+The only way to flush the script cache is by explicitly calling the `SCRIPT
+FLUSH` command, which will _completely flush_ the scripts cache removing all the
 scripts executed so far.
 
 This is usually needed only when the instance is going to be instantiated for
 another customer or application in a cloud environment.
 
-Also, as already mentioned, restarting a Redis instance flushes the
-script cache, which is not persistent. However from the point of view of the
-client there are only two ways to make sure a Redis instance was not restarted
-between two different commands.
+Also, as already mentioned, restarting a Redis instance flushes the script
+cache, which is not persistent.
+However from the point of view of the client there are only two ways to make
+sure a Redis instance was not restarted between two different commands.
 
-* The connection we have with the server is persistent and was never closed so far.
-* The client explicitly checks the `runid` field in the `INFO` command in order to make sure the server was not restarted and is still the same process.
+* The connection we have with the server is persistent and was never closed so
+  far.
+* The client explicitly checks the `runid` field in the `INFO` command in order
+  to make sure the server was not restarted and is still the same process.
 
-Practically speaking, for the client it is much better to simply assume that in the context of a given connection, cached scripts are guaranteed to be there
+Practically speaking, for the client it is much better to simply assume that in
+the context of a given connection, cached scripts are guaranteed to be there
 unless an administrator explicitly called the `SCRIPT FLUSH` command.
 
 The fact that the user can count on Redis not removing scripts is semantically
@@ -465,8 +493,8 @@ regardless of the architecture of the system running Redis.
 32-bit, 64-bit, big-endian and little-endian systems will all produce the same
 output.
 
-Async counterparts, do not have these limitations, since they are replicated
-by the commands they execute, not by running the script again.
+Async counterparts, do not have these limitations, since they are replicated by
+the commands they execute, not by running the script again.
 
 ## Global variables protection
 
@@ -512,8 +540,8 @@ The Redis Lua interpreter loads the following Lua libraries:
 Every Redis instance is _guaranteed_ to have all the above libraries so you can
 be sure that the environment for your Redis scripts is always the same.
 
-struct, CJSON and cmsgpack are external libraries, all the other libraries are standard
-Lua libraries.
+struct, CJSON and cmsgpack are external libraries, all the other libraries are
+standard Lua libraries.
 
 ### struct
 
@@ -538,7 +566,6 @@ f - float
 d - double
 ' ' - ignored
 ```
-
 
 Example:
 
@@ -569,7 +596,8 @@ redis 127.0.0.1:6379> eval 'return cjson.decode(ARGV[1])["foo"]' 0 "{\"foo\":\"b
 
 ### cmsgpack
 
-The cmsgpack library provides simple and fast MessagePack manipulation within Lua.
+The cmsgpack library provides simple and fast MessagePack manipulation within
+Lua.
 
 Example:
 
@@ -665,8 +693,8 @@ following happens:
   `SHUTDOWN NOSAVE` that stops the server without saving the current data set on
   disk (basically the server is aborted).
 
- `EVALASYNC` and `EVALSHAASYNC`` do not obey the time limit restriction, since they
- do not block other clients.
+`EVALASYNC` and `EVALSHAASYNC` ` do not obey the time limit restriction, since
+they do not block other clients.
 
 ## EVALSHA in the context of pipelining
 

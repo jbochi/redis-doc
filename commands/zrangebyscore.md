@@ -41,8 +41,8 @@ Will return all the elements with `5 < score < 10` (5 and 10 excluded).
 
 @return
 
-@array-reply: list of elements in the specified score range (optionally
-with their scores).
+@array-reply: list of elements in the specified score range (optionally with
+their scores).
 
 @examples
 

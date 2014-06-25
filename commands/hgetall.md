@@ -4,8 +4,8 @@ of the reply is twice the size of the hash.
 
 @return
 
-@array-reply: list of fields and their values stored in the hash, or an
-empty list when `key` does not exist.
+@array-reply: list of fields and their values stored in the hash, or an empty
+list when `key` does not exist.
 
 @examples
 

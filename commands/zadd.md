@@ -6,19 +6,20 @@ updated and the element reinserted at the right position to ensure the correct
 ordering.
 
 If `key` does not exist, a new sorted set with the specified members as sole
-members is created, like if the sorted set was empty. If the key exists but does not hold a sorted set, an error is returned.
+members is created, like if the sorted set was empty.
+If the key exists but does not hold a sorted set, an error is returned.
 
-The score values should be the string representation of a double precision floating point number. `+inf` and `-inf` values are valid values as well.
+The score values should be the string representation of a double precision
+floating point number.
+`+inf` and `-inf` values are valid values as well.
 
-Sorted sets 101
----
+## Sorted sets 101
 
 Sorted sets are sorted by their score in an ascending way.
-The same element only exists a single time, no repeated elements are
-permitted. The score can be modified both by `ZADD` that will update the
-element score, and as a side effect, its position on the sorted set, and
-by `ZINCRBY` that can be used in order to update the score relatively to its
-previous value.
+The same element only exists a single time, no repeated elements are permitted.
+The score can be modified both by `ZADD` that will update the element score, and
+as a side effect, its position on the sorted set, and by `ZINCRBY` that can be
+used in order to update the score relatively to its previous value.
 
 The current score of an element can be retrieved using the `ZSCORE` command,
 that can also be used to verify if an element already exists or not.
@@ -28,15 +29,22 @@ sets][tdtss].
 
 [tdtss]: /topics/data-types#sorted-sets
 
-Elements with the same score
----
+## Elements with the same score
 
 While the same element can't be repeated in a sorted set since every element
-is unique, it is possible to add multiple different elements *having the same score*. When multiple elements have the same score, they are *ordered lexicographically* (they are still ordered by score as a first key, however, locally, all the elements with the same score are relatively ordered lexicographically).
+is unique, it is possible to add multiple different elements _having the same
+score_.
+When multiple elements have the same score, they are _ordered lexicographically_
+(they are still ordered by score as a first key, however, locally, all the
+elements with the same score are relatively ordered lexicographically).
 
-The lexicographic ordering used is binary, it compares strings as array of bytes.
+The lexicographic ordering used is binary, it compares strings as array of
+bytes.
 
-If the user inserts all the elements in a sorted set with the same score (for example 0), all the elements of the sorted set are sorted lexicographically, and range queries on elements are possible using the command `ZRANGEBYLEX` (Note: it is also possible to query sorted sets by range of scores using `ZRANGEBYSCORE`).
+If the user inserts all the elements in a sorted set with the same score (for
+example 0), all the elements of the sorted set are sorted lexicographically, and
+range queries on elements are possible using the command `ZRANGEBYLEX` (Note: it
+is also possible to query sorted sets by range of scores using `ZRANGEBYSCORE`).
 
 @return
 

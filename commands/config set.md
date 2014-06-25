@@ -11,10 +11,10 @@ All the configuration parameters set using `CONFIG SET` are immediately loaded
 by Redis and will take effect starting with the next command executed.
 
 All the supported parameters have the same meaning of the equivalent
-configuration parameter used in the [redis.conf][hgcarr22rc] file, with the
+configuration parameter used in the [redis.conf][hgcarr28rc] file, with the
 following important differences:
 
-[hgcarr22rc]: http://github.com/antirez/redis/raw/2.8/redis.conf
+[hgcarr28rc]: http://github.com/antirez/redis/raw/2.8/redis.conf
 
 * Where bytes or other quantities are specified, it is not possible to use
   the `redis.conf` abbreviated form (10k 2gb ... and so forth), everything

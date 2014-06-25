@@ -26,8 +26,8 @@ array with (value, score) arrays/tuples).
 
 @return
 
-@array-reply: list of elements in the specified range (optionally with
-their scores).
+@array-reply: list of elements in the specified range (optionally with their
+scores).
 
 @examples
 
