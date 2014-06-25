@@ -7,7 +7,11 @@ task :parse do
 
   Batch.each(Dir["**/*.json"] + Dir["**/*.md"]) do |file|
     if File.extname(file) == ".md"
-      RDiscount.new(File.read(file)).to_html
+
+      File.open(file.sub(".md", ".html"), "w") do |f|
+        f.print(RDiscount.new(File.read(file)).to_html)
+      end
+
     else
       JSON.parse(File.read(file))
     end
